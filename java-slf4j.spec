@@ -18,16 +18,16 @@ Version:	1.5.8
 Release:	0.1
 License:	MIT
 Group:		Libraries/Java
-Source0:	http://xatka.net/~z/PLD/slf4j-1.5.8.tar.bz2
+Source0:	http://xatka.net/~z/PLD/slf4j-%{version}.tar.bz2
 # Source0-md5:	841e16c3d5d5a323ceabfc6bdce10bb8
 Source1:	%{name}-genbuildxml.sh
 URL:		http://www.slf4j.org/
-%{!?with_java_sun:BuildRequires:	java-gcj-compat-devel}
-%{?with_java_sun:BuildRequires:	java-sun}
-BuildRequires:	javassist
 BuildRequires:	java-commons-lang
 BuildRequires:	java-commons-logging
+%{!?with_java_sun:BuildRequires:	java-gcj-compat-devel}
 BuildRequires:	java-log4j
+%{?with_java_sun:BuildRequires:	java-sun}
+BuildRequires:	javassist
 BuildRequires:	jpackage-utils
 BuildRequires:	rpm >= 4.4.9-56
 BuildRequires:	rpm-javaprov
@@ -37,10 +37,10 @@ BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-The Simple Logging Facade for Java or (SLF4J) serves as a simple facade or
-abstraction for various logging frameworks, e.g. java.util.logging, log4j and
-logback, allowing the end user to plug in the desired logging framework at
-deployment time.
+The Simple Logging Facade for Java or (SLF4J) serves as a simple
+facade or abstraction for various logging frameworks, e.g.
+java.util.logging, log4j and logback, allowing the end user to plug in
+the desired logging framework at deployment time.
 
 %prep
 %setup -q -n %{srcname}-%{version}
