@@ -1,7 +1,7 @@
-#
-# Conditional build:
-%bcond_without	javadoc		# don't build javadoc
-%bcond_without	tests		# don't build and run tests
+# TODO:
+# - javadocs?
+# - tests?
+# - split into subpackages?
 
 %if "%{pld_release}" == "ti"
 %bcond_without	java_sun	# build with gcj
@@ -20,7 +20,7 @@ License:	MIT
 Group:		Libraries/Java
 Source0:	http://xatka.net/~z/PLD/slf4j-1.5.8.tar.bz2
 # Source0-md5:	841e16c3d5d5a323ceabfc6bdce10bb8
-Source1:	%{name}-build.xml
+Source1:	%{name}-genbuildxml.sh
 URL:		http://www.slf4j.org/
 %{!?with_java_sun:BuildRequires:	java-gcj-compat-devel}
 %{?with_java_sun:BuildRequires:	java-sun}
@@ -42,72 +42,21 @@ abstraction for various logging frameworks, e.g. java.util.logging, log4j and
 logback, allowing the end user to plug in the desired logging framework at
 deployment time.
 
-%package doc
-Summary:	Manual for %{name}
-Summary(fr.UTF-8):	Documentation pour %{name}
-Summary(it.UTF-8):	Documentazione di %{name}
-Summary(pl.UTF-8):	Podręcznik dla %{name}
-Group:		Documentation
-
-%description doc
-Documentation for %{name}.
-
-%description doc -l fr.UTF-8
-Documentation pour %{name}.
-
-%description doc -l it.UTF-8
-Documentazione di %{name}.
-
-%description doc -l pl.UTF-8
-Dokumentacja do %{name}.
-
-%package javadoc
-Summary:	Online manual for %{name}
-Summary(pl.UTF-8):	Dokumentacja online do %{name}
-Group:		Documentation
-Requires:	jpackage-utils
-
-%description javadoc
-Documentation for %{name}.
-
-%description javadoc -l pl.UTF-8
-Dokumentacja do %{name}.
-
-%description javadoc -l fr.UTF-8
-Javadoc pour %{name}.
-
-%package demo
-Summary:	Demo for %{name}
-Summary(pl.UTF-8):	Pliki demonstracyjne dla pakietu %{name}
-Group:		Documentation
-Requires:	%{name} = %{epoch}:%{version}-%{release}
-
-%description demo
-Demonstrations and samples for %{name}.
-
-%description demo -l pl.UTF-8
-Pliki demonstracyjne i przykłady dla pakietu %{name}.
-
-%package manual
-Summary:	Tutorial for %{name}
-Group:		Documentation
-
-%description manual
-Manual for %{name}.
-
 %prep
 %setup -q -n %{srcname}-%{version}
-cp %{SOURCE1} build.xml
+
+find -name MANIFEST.MF | xargs sed -i 's,${project.version},%{version},g'
+
+# break build if any macro is left
+find -name MANIFEST.MF | ! xargs grep '\${'
 
 %build
 
 export JAVA_HOME="%{java_home}"
 
-# required_jars="jaxp_parser_impl"
-# CLASSPATH=$(build-classpath $required_jars)
-# export CLASSPATH
-
 export LC_ALL=en_US # source code not US-ASCII
+
+sh %{SOURCE1} > build.xml
 
 javassist_jar=$(find-jar javassist)
 commons_logging_jar=$(find-jar commons-logging-api)
@@ -125,37 +74,15 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_javadir}
 
 # jars
-cp -a dist/%{srcname}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-%{version}.jar
-ln -s %{srcname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}.jar
-
-# javadoc
-%if %{with javadoc}
-install -d $RPM_BUILD_ROOT%{_javadocdir}/%{srcname}-%{version}
-cp -a dist/docs/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{srcname}-%{version}
-ln -s %{srcname}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{srcname} # ghost symlink
-%endif
-
-# demo
-install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
-cp -a demo/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+for j in dist/*.jar; do
+  n=$(basename $j .jar)
+  cp -a $j $RPM_BUILD_ROOT%{_javadir}/$n-%{version}.jar
+  ln -s $n-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/$n.jar
+done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post javadoc
-ln -nfs %{srcname}-%{version} %{_javadocdir}/%{srcname}
-
 %files
 %defattr(644,root,root,755)
 %{_javadir}/*.jar
-
-%files doc
-%defattr(644,root,root,755)
-%doc docs/*
-
-%if %{with javadoc}
-%files javadoc
-%defattr(644,root,root,755)
-%{_javadocdir}/%{srcname}-%{version}
-%ghost %{_javadocdir}/%{srcname}
-%endif
