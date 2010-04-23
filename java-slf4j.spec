@@ -3,12 +3,6 @@
 # - tests?
 # - split into subpackages?
 
-%if "%{pld_release}" == "ti"
-%bcond_without	java_sun	# build with gcj
-%else
-%bcond_with	java_sun	# build with java-sun
-%endif
-#
 %include	/usr/lib/rpm/macros.java
 
 %define		srcname		slf4j
@@ -24,12 +18,10 @@ Source1:	%{name}-genbuildxml.sh
 URL:		http://www.slf4j.org/
 BuildRequires:	java-commons-lang
 BuildRequires:	java-commons-logging
-%{!?with_java_sun:BuildRequires:	java-gcj-compat-devel}
 BuildRequires:	java-log4j
-%{?with_java_sun:BuildRequires:	java-sun}
+BuildRequires:	jdk
 BuildRequires:	javassist
 BuildRequires:	jpackage-utils
-BuildRequires:	rpm >= 4.4.9-56
 BuildRequires:	rpm-javaprov
 BuildRequires:	rpmbuild(macros) >= 1.300
 Requires:	jpackage-utils
