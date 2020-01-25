@@ -4,7 +4,6 @@
 # - split into subpackages?
 
 %define		srcname		slf4j
-%include	/usr/lib/rpm/macros.java
 Summary:	Simple Logging Facade for Java
 Summary(pl.UTF-8):	Simple Logging Facade for Java - prosta fasada do logowania dla Javy
 Name:		java-%{srcname}
